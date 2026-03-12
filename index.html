@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>⚡ Навигатор Гарри</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; }
+    ::-webkit-scrollbar { width: 6px; } 
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const INITIAL_GOALS = [
+  { id: 1, title: "Провести первый поток курса Елены", deadline: "1 апреля 2026", status: "active", track: "photo", progress: 30 },
+  { id: 2, title: "Запустить Reels для трафика аккаунта Елены", deadline: "Апрель 2026", status: "planned", track: "photo", progress: 0 },
+  { id: 3, title: "Получить 3+ оплат на 2-й поток курса", deadline: "Май 2026", status: "planned", track: "photo", progress: 0 },
+  { id: 4, title: "Создать первый продукт по vibe-кодингу", deadline: "Май 2026", status: "planned", track: "vibe", progress: 0 },
+  { id: 5, title: "Снимать Reels по vibe-кодингу для трафика", deadline: "Май 2026", status: "planned", track: "vibe", progress: 0 },
+  { id: 6, title: "Запустить консультации по SMM (если будет желание)", deadline: "Конец 2026", status: "planned", track: "smm", progress: 0 },
+];
+
+const INITIAL_TASKS = [
+  { id: 1, text: "Составить программу курса", done: false },
+  { id: 2, text: "Записать тизер / ознакомительный урок", done: false },
+  { id: 3, text: "Прогревающие сторис (3–5 дней до старта)", done: false },
+  { id: 4, text: "Серия Reels по советам фото", done: false },
+  { id: 5, text: "Настроить анкету / фильтр заявок", done: false },
+];
+
+const TRACKS = {
+  photo: { label: "Курс фото", color: "#f97316" },
+  smm:   { label: "SMM",       color: "#3b82f6" },
+  vibe:  { label: "Vibe-кодинг", color: "#8b5cf6" },
+};
+
+const STATUS_MAP = {
+  done:    { label: "Выполнено ✓",   color: "#22c55e" },
+  active:  { label: "В работе",      color: "#f97316" },
+  planned: { label: "Запланировано", color: "#94a3b8" },
+};
+
+function formatDate(str) {
+  if (!str) return "";
+  return new Date(str).toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
+function load(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+function App() {
+  const [tab, setTab]       = React.useState("dashboard");
+  const [goals, setGoals]   = React.useState(() => load("garry_goals_v3", INITIAL_GOALS));
+  const [tasks, setTasks]   = React.useState(() => load("garry_tasks_v3", INITIAL_TASKS));
+  const [logs, setLogs]     = React.useState(() => load("garry_logs_v3", []));
+  const [logText, setLogText] = React.useState("");
+  const [logDate, setLogDate] = React.useState(new Date().toISOString().slice(0, 10));
+  const [newTask, setNewTask] = React.useState("");
+  const [saved, setSaved]   = React.useState(false);
+
+  const sg = v => { setGoals(v); save("garry_goals_v3", v); };
+  const st = v => { setTasks(v); save("garry_tasks_v3", v); };
+  const sl = v => { setLogs(v);  save("garry_logs_v3",  v); };
+
+  const done = tasks.filter(t => t.done).length;
+  const pct  = tasks.length ? Math.round(done / tasks.length * 100) : 0;
+
+  const card = { background: "#1e293b", border: "1px solid #334155", borderRadius: 12, padding: 16, marginBottom: 12 };
+  const hdg  = { fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 };
+  const inp  = { background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", padding: "9px 12px", borderRadius: 8, fontSize: 13, outline: "none", width: "100%", fontFamily: "inherit" };
+
+  return (
+    <div style={{ minHeight: "100vh" }}>
+      {/* Header */}
+      <div style={{ background: "#1e293b", borderBottom: "1px solid #334155", padding: "16px 20px 0", position: "sticky", top: 0, zIndex: 10 }}>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 2 }}>⚡ Навигатор Гарри</div>
+        <div style={{ fontSize: 12, color: "#64748b", marginBottom: 12 }}>SMM & Digital · Старт: ноябрь 2025</div>
+        <div style={{ display: "flex", overflowX: "auto" }}>
+          {[["dashboard","📊 Дашборд"],["goals","🎯 Цели"],["tasks","✅ Задачи"],["log","📝 Дневник"]].map(([k,l]) => (
+            <button key={k} onClick={() => setTab(k)} style={{
+              background: "none", border: "none", cursor: "pointer", whiteSpace: "nowrap",
+              padding: "8px 14px", fontSize: 13, fontWeight: 600,
+              color: tab === k ? "#f97316" : "#64748b",
+              borderBottom: tab === k ? "2px solid #f97316" : "2px solid transparent"
+            }}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: 16, maxWidth: 660, margin: "0 auto" }}>
+
+        {/* DASHBOARD */}
+        {tab === "dashboard" && <>
+          <div style={{ background: "linear-gradient(135deg,#1c1917,#1e293b)", border: "1px solid #f97316", borderRadius: 12, padding: 16, marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>🔥 Главный фокус</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#fef3c7" }}>Запуск курса Елены — 1 апреля 2026</div>
+            <div style={{ fontSize: 13, color: "#a8a29e", marginTop: 4 }}>Всё остальное — второй приоритет до этой даты</div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
+            {[
+              [goals.filter(g => g.status === "done").length, "Целей выполнено"],
+              [goals.filter(g => g.status !== "done").length, "Целей в работе"],
+              [logs.length, "Записей в дневнике"],
+            ].map(([n, l], i) => (
+              <div key={i} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: 10, padding: "14px 10px", textAlign: "center" }}>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "#f97316" }}>{n}</div>
+                <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={card}>
+            <div style={hdg}>Задачи до 1 апреля</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+              <div style={{ flex: 1, height: 8, background: "#334155", borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ width: pct + "%", height: "100%", background: "#f97316", borderRadius: 999, transition: "width 0.4s" }} />
+              </div>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#f97316" }}>{pct}%</span>
+            </div>
+            <div style={{ fontSize: 12, color: "#64748b" }}>{done} из {tasks.length} задач выполнено</div>
+          </div>
+
+          <div style={card}>
+            <div style={hdg}>Последние записи дневника</div>
+            {logs.length === 0
+              ? <div style={{ fontSize: 13, color: "#475569" }}>Записей пока нет — добавь первую во вкладке «Дневник»</div>
+              : logs.slice(0, 3).map(e => (
+                <div key={e.id} style={{ padding: "10px 0", borderBottom: "1px solid #334155" }}>
+                  <div style={{ fontSize: 11, color: "#64748b", marginBottom: 3 }}>{formatDate(e.date)}</div>
+                  <div style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.5 }}>{e.text}</div>
+                </div>
+              ))
+            }
+          </div>
+
+          <div style={card}>
+            <div style={hdg}>Мой профиль</div>
+            {[
+              ["Бэкграунд", "15 лет на заводах → онлайн с ноября 2025"],
+              ["Обучение", "Курс Элеоноры Тюриной (маркетинговые стратегии, 8 нед.)"],
+              ["Тех. база", "HTML, CSS, JS (базово) + vibe-кодинг (в изучении)"],
+              ["Проект Елены", "Фотограф 10 лет · ниша: семья, беременные, дети"],
+              ["Менторство", "Клуб Миши Тимочка — запуски и воронки"],
+            ].map(([k, v]) => (
+              <div key={k} style={{ display: "flex", gap: 10, padding: "7px 0", borderBottom: "1px solid #334155", fontSize: 13 }}>
+                <span style={{ color: "#64748b", minWidth: 110, flexShrink: 0 }}>{k}</span>
+                <span style={{ color: "#cbd5e1" }}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {/* GOALS */}
+        {tab === "goals" && (
+          <div style={card}>
+            <div style={hdg}>Все цели</div>
+            {goals.map(goal => {
+              const track  = TRACKS[goal.track];
+              const status = STATUS_MAP[goal.status];
+              return (
+                <div key={goal.id} style={{ padding: "14px 0", borderBottom: "1px solid #334155" }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#f1f5f9", marginBottom: 8 }}>{goal.title}</div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 10 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: track.color, background: track.color + "22", padding: "2px 8px", borderRadius: 20 }}>{track.label}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: status.color, background: status.color + "22", padding: "2px 8px", borderRadius: 20 }}>{status.label}</span>
+                    <span style={{ fontSize: 11, color: "#64748b" }}>📅 {goal.deadline}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+                    <div style={{ flex: 1, height: 6, background: "#334155", borderRadius: 999, overflow: "hidden" }}>
+                      <div style={{ width: goal.progress + "%", height: "100%", background: track.color, borderRadius: 999 }} />
+                    </div>
+                    <span style={{ fontSize: 12, color: "#64748b", minWidth: 32 }}>{goal.progress}%</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <input type="range" min="0" max="100" value={goal.progress}
+                      onChange={e => sg(goals.map(g => g.id === goal.id ? { ...g, progress: +e.target.value } : g))}
+                      style={{ width: 100, accentColor: track.color, cursor: "pointer" }} />
+                    <select value={goal.status}
+                      onChange={e => sg(goals.map(g => g.id === goal.id ? { ...g, status: e.target.value } : g))}
+                      style={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", padding: "4px 8px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>
+                      <option value="planned">Запланировано</option>
+                      <option value="active">В работе</option>
+                      <option value="done">Выполнено ✓</option>
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* TASKS */}
+        {tab === "tasks" && (
+          <div style={card}>
+            <div style={hdg}>Задачи до 1 апреля · {done}/{tasks.length}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div style={{ flex: 1, height: 8, background: "#334155", borderRadius: 999, overflow: "hidden" }}>
+                <div style={{ width: pct + "%", height: "100%", background: "#f97316", borderRadius: 999, transition: "width 0.4s" }} />
+              </div>
+              <span style={{ fontSize: 14, fontWeight: 800, color: "#f97316" }}>{pct}%</span>
+            </div>
+            {tasks.map(task => (
+              <div key={task.id} onClick={() => st(tasks.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
+                style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0", borderBottom: "1px solid #334155", cursor: "pointer" }}>
+                <div style={{ width: 20, height: 20, borderRadius: 5, flexShrink: 0, border: task.done ? "none" : "2px solid #475569", background: task.done ? "#f97316" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {task.done && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
+                </div>
+                <span style={{ fontSize: 14, color: task.done ? "#475569" : "#cbd5e1", textDecoration: task.done ? "line-through" : "none" }}>{task.text}</span>
+              </div>
+            ))}
+            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+              <input value={newTask} onChange={e => setNewTask(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && newTask.trim()) { st([...tasks, { id: Date.now(), text: newTask.trim(), done: false }]); setNewTask(""); } }}
+                placeholder="Добавить задачу..." style={{ ...inp, flex: 1 }} />
+              <button onClick={() => { if (newTask.trim()) { st([...tasks, { id: Date.now(), text: newTask.trim(), done: false }]); setNewTask(""); } }}
+                style={{ background: "#f97316", color: "#fff", border: "none", padding: "9px 16px", borderRadius: 8, fontSize: 16, cursor: "pointer", fontWeight: 700 }}>+</button>
+            </div>
+          </div>
+        )}
+
+        {/* LOG */}
+        {tab === "log" && <>
+          <div style={card}>
+            <div style={hdg}>Добавить запись</div>
+            <input type="date" value={logDate} onChange={e => setLogDate(e.target.value)}
+              style={{ ...inp, marginBottom: 10 }} />
+            <textarea value={logText} onChange={e => setLogText(e.target.value)}
+              placeholder="Что сделал сегодня? Что получилось / не получилось? Какие мысли?"
+              style={{ ...inp, minHeight: 90, resize: "vertical" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10 }}>
+              <button onClick={() => {
+                if (!logText.trim()) return;
+                sl([{ id: Date.now(), date: logDate, text: logText.trim() }, ...logs]);
+                setLogText(""); setSaved(true); setTimeout(() => setSaved(false), 1500);
+              }} style={{ background: "#f97316", color: "#fff", border: "none", padding: "9px 18px", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Сохранить</button>
+              {saved && <span style={{ fontSize: 12, color: "#22c55e" }}>✓ Сохранено!</span>}
+            </div>
+          </div>
+          <div style={card}>
+            <div style={hdg}>История · {logs.length} записей</div>
+            {logs.length === 0
+              ? <div style={{ fontSize: 13, color: "#475569" }}>Пока пусто. Начни сегодня — даже одна строчка в день даёт результат.</div>
+              : logs.map(e => (
+                <div key={e.id} style={{ padding: "10px 0", borderBottom: "1px solid #334155" }}>
+                  <div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>{formatDate(e.date)}</div>
+                  <div style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.5 }}>{e.text}</div>
+                </div>
+              ))
+            }
+          </div>
+        </>}
+
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
