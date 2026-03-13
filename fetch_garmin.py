@@ -12,8 +12,8 @@ try:
     oauth2 = json.loads(os.environ["GARMIN_OAUTH2"])
 
     garth.configure(domain="garmin.com")
-    garth.client.oauth1_token = garth.auth.OAuth1Token(**oauth1)
-    garth.client.oauth2_token = garth.auth.OAuth2Token(**oauth2)
+    garth.client.oauth1_token = garth.OAuth1Token(**oauth1)
+    garth.client.oauth2_token = garth.OAuth2Token(**oauth2)
 
     client = Garmin()
     client.garth = garth.client
