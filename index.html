@@ -217,12 +217,15 @@ function App() {
               <span style={{ fontSize: 14, fontWeight: 800, color: "#f97316" }}>{pct}%</span>
             </div>
             {tasks.map(task => (
-              <div key={task.id} onClick={() => st(tasks.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
-                style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0", borderBottom: "1px solid #334155", cursor: "pointer" }}>
-                <div style={{ width: 20, height: 20, borderRadius: 5, flexShrink: 0, border: task.done ? "none" : "2px solid #475569", background: task.done ? "#f97316" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div key={task.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0", borderBottom: "1px solid #334155" }}>
+                <div onClick={() => st(tasks.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
+                  style={{ width: 20, height: 20, borderRadius: 5, flexShrink: 0, border: task.done ? "none" : "2px solid #475569", background: task.done ? "#f97316" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                   {task.done && <span style={{ color: "#fff", fontSize: 12 }}>✓</span>}
                 </div>
-                <span style={{ fontSize: 14, color: task.done ? "#475569" : "#cbd5e1", textDecoration: task.done ? "line-through" : "none" }}>{task.text}</span>
+                <span onClick={() => st(tasks.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
+                  style={{ fontSize: 14, color: task.done ? "#475569" : "#cbd5e1", textDecoration: task.done ? "line-through" : "none", flex: 1, cursor: "pointer" }}>{task.text}</span>
+                <button onClick={() => st(tasks.filter(t => t.id !== task.id))}
+                  style={{ background: "none", border: "none", color: "#475569", fontSize: 16, cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0 }}>✕</button>
               </div>
             ))}
             <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
