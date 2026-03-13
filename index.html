@@ -20,26 +20,28 @@
 <script type="text/babel">
 
 const INITIAL_GOALS = [
-  { id: 1, title: "Провести первый поток курса Елены", deadline: "1 апреля 2026", status: "active", track: "photo", progress: 30 },
-  { id: 2, title: "Запустить Reels для трафика аккаунта Елены", deadline: "Апрель 2026", status: "planned", track: "photo", progress: 0 },
-  { id: 3, title: "Получить 3+ оплат на 2-й поток курса", deadline: "Май 2026", status: "planned", track: "photo", progress: 0 },
-  { id: 4, title: "Создать первый продукт по vibe-кодингу", deadline: "Май 2026", status: "planned", track: "vibe", progress: 0 },
-  { id: 5, title: "Снимать Reels по vibe-кодингу для трафика", deadline: "Май 2026", status: "planned", track: "vibe", progress: 0 },
-  { id: 6, title: "Запустить консультации по SMM (если будет желание)", deadline: "Конец 2026", status: "planned", track: "smm", progress: 0 },
+  { id: 1, title: "Закрыть первого SMM-клиента (ворота)", deadline: "Март 2026", status: "active", track: "smm", progress: 10 },
+  { id: 2, title: "Создать и упаковать новый Instagram аккаунт", deadline: "Март 2026", status: "active", track: "brand", progress: 0 },
+  { id: 3, title: "Снять первые 4 Reels (маркетинг + vibe-кодинг)", deadline: "Апрель 2026", status: "planned", track: "brand", progress: 0 },
+  { id: 4, title: "Найти ещё 1-2 SMM-клиентов", deadline: "Апрель 2026", status: "planned", track: "smm", progress: 0 },
+  { id: 5, title: "Создать первый продукт на vibe-кодинге", deadline: "Май 2026", status: "planned", track: "vibe", progress: 0 },
+  { id: 6, title: "Выйти на стабильный доход от SMM-услуг", deadline: "Июль 2026", status: "planned", track: "smm", progress: 0 },
 ];
 
 const INITIAL_TASKS = [
-  { id: 1, text: "Составить программу курса", done: false },
-  { id: 2, text: "Записать тизер / ознакомительный урок", done: false },
-  { id: 3, text: "Прогревающие сторис (3–5 дней до старта)", done: false },
-  { id: 4, text: "Серия Reels по советам фото", done: false },
-  { id: 5, text: "Настроить анкету / фильтр заявок", done: false },
+  { id: 1, text: "Поговорить со знакомым про ворота — предложить ведение", done: false },
+  { id: 2, text: "Создать новый Instagram аккаунт (маркетинг + vibe)", done: false },
+  { id: 3, text: "Написать шапку профиля и упаковать аккаунт", done: false },
+  { id: 4, text: "Написать сценарий первого Reels", done: false },
+  { id: 5, text: "Снять и опубликовать первый Reels", done: false },
+  { id: 6, text: "Найти ещё 2-3 потенциальных клиентов в окружении", done: false },
+  { id: 7, text: "Определить тему первого продукта на vibe-кодинге", done: false },
 ];
 
 const TRACKS = {
-  photo: { label: "Курс фото", color: "#f97316" },
-  smm:   { label: "SMM",       color: "#3b82f6" },
-  vibe:  { label: "Vibe-кодинг", color: "#8b5cf6" },
+  smm:   { label: "SMM-услуги",   color: "#3b82f6" },
+  vibe:  { label: "Vibe-кодинг",  color: "#8b5cf6" },
+  brand: { label: "Личный бренд", color: "#ec4899" },
 };
 
 const STATUS_MAP = {
@@ -105,8 +107,8 @@ function App() {
         {tab === "dashboard" && <>
           <div style={{ background: "linear-gradient(135deg,#1c1917,#1e293b)", border: "1px solid #f97316", borderRadius: 12, padding: 16, marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>🔥 Главный фокус</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#fef3c7" }}>Запуск курса Елены — 1 апреля 2026</div>
-            <div style={{ fontSize: 13, color: "#a8a29e", marginTop: 4 }}>Всё остальное — второй приоритет до этой даты</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#fef3c7" }}>Закрыть первого клиента + запустить аккаунт</div>
+            <div style={{ fontSize: 13, color: "#a8a29e", marginTop: 4 }}>4 месяца в запасе · Март — Июль 2026</div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
@@ -152,8 +154,10 @@ function App() {
               ["Бэкграунд", "15 лет на заводах → онлайн с ноября 2025"],
               ["Обучение", "Курс Элеоноры Тюриной (маркетинговые стратегии, 8 нед.)"],
               ["Тех. база", "HTML, CSS, JS (базово) + vibe-кодинг (в изучении)"],
-              ["Проект Елены", "Фотограф 10 лет · ниша: семья, беременные, дети"],
+              ["Направление", "SMM-услуги + vibe-кодинг + личный бренд"],
+              ["Первый клиент", "Знакомый — продажа автоматических ворот, 11,7к подписчиков"],
               ["Менторство", "Клуб Миши Тимочка — запуски и воронки"],
+              ["Горизонт", "4 месяца (март — июль 2026)"],
             ].map(([k, v]) => (
               <div key={k} style={{ display: "flex", gap: 10, padding: "7px 0", borderBottom: "1px solid #334155", fontSize: 13 }}>
                 <span style={{ color: "#64748b", minWidth: 110, flexShrink: 0 }}>{k}</span>
