@@ -5,5 +5,6 @@
   "calories": 0,
   "resting_hr": 0,
   "stress": 0,
-  "body_battery": 0
+  "body_battery": 0,
+  "error": "Authentication failed: Error in request: 401 Client Error: Unauthorized for url: https://sso.garmin.com/sso/signin?id=gauth-widget&embedWidget=true&gauthHost=https%3A%2F%2Fsso.garmin.com%2Fsso%2Fembed&service=https%3A%2F%2Fsso.garmin.com%2Fsso%2Fembed&source=https%3A%2F%2Fsso.garmin.com%2Fsso%2Fembed&redirectAfterAccountLoginUrl=https%3A%2F%2Fsso.garmin.com%2Fsso%2Fembed&redirectAfterAccountCreationUrl=https%3A%2F%2Fsso.garmin.com%2Fsso%2Fembed"
 }
