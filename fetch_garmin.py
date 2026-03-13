@@ -19,6 +19,8 @@ try:
 
     client = Garmin()
     client.garth = garth.client
+    client.display_name = garth.client.profile["displayName"]
+    client.full_name = garth.client.profile.get("fullName", "")
 
     steps_data   = client.get_steps_data(today_str)
     sleep_data   = client.get_sleep_data(today_str)
