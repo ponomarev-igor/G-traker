@@ -24,8 +24,8 @@ jobs:
 
       - name: Fetch Garmin data
         env:
-          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
-          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          GARMIN_OAUTH1: ${{ secrets.GARMIN_OAUTH1 }}
+          GARMIN_OAUTH2: ${{ secrets.GARMIN_OAUTH2 }}
         run: python fetch_garmin.py
 
       - name: Commit and push

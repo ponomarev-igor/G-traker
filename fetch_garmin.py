@@ -1,19 +1,22 @@
 import json
 import os
 from datetime import date
-
-email = os.environ["GARMIN_EMAIL"]
-password = os.environ["GARMIN_PASSWORD"]
+import garth
+from garminconnect import Garmin
 
 today = date.today()
 today_str = today.isoformat()
 
 try:
-    import garth
-    from garminconnect import Garmin
+    oauth1 = json.loads(os.environ["GARMIN_OAUTH1"])
+    oauth2 = json.loads(os.environ["GARMIN_OAUTH2"])
 
-    client = Garmin(email=email, password=password)
-    client.login()
+    garth.configure(domain="garmin.com")
+    garth.client.oauth1_token = garth.auth.OAuth1Token(**oauth1)
+    garth.client.oauth2_token = garth.auth.OAuth2Token(**oauth2)
+
+    client = Garmin()
+    client.garth = garth.client
 
     steps_data   = client.get_steps_data(today_str)
     sleep_data   = client.get_sleep_data(today_str)
