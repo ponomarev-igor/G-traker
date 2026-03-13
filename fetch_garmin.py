@@ -2,6 +2,7 @@ import json
 import os
 from datetime import date
 import garth
+from garth.http import OAuth1Token, OAuth2Token
 from garminconnect import Garmin
 
 today = date.today()
@@ -12,8 +13,8 @@ try:
     oauth2 = json.loads(os.environ["GARMIN_OAUTH2"])
 
     garth.configure(domain="garmin.com")
-    garth.client.oauth1_token = garth.OAuth1Token(**oauth1)
-    garth.client.oauth2_token = garth.OAuth2Token(**oauth2)
+    garth.client.oauth1_token = OAuth1Token(**oauth1)
+    garth.client.oauth2_token = OAuth2Token(**oauth2)
 
     client = Garmin()
     client.garth = garth.client
