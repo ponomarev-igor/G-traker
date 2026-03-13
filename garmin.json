@@ -6,5 +6,5 @@
   "resting_hr": 0,
   "stress": 0,
   "body_battery": 0,
-  "error": "3 validation errors for OAuth2Token\nscope\n  Field required [type=missing, input_value=ArgsKwargs((), {'access_t...xpires_at': 1776012599}), input_type=ArgsKwargs]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\njti\n  Field required [type=missing, input_value=ArgsKwargs((), {'access_t...xpires_at': 1776012599}), input_type=ArgsKwargs]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing\ntoken_type\n  Field required [type=missing, input_value=ArgsKwargs((), {'access_t...xpires_at': 1776012599}), input_type=ArgsKwargs]\n    For further information visit https://errors.pydantic.dev/2.12/v/missing"
+  "error": "Unterminated string starting at: line 1 column 715 (char 714)"
 }
