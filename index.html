@@ -70,6 +70,7 @@ function App() {
   const [logText, setLogText] = React.useState("");
   const [logDate, setLogDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [newTask, setNewTask] = React.useState("");
+  const [newTaskGoalId, setNewTaskGoalId] = React.useState(1);
   const [saved, setSaved]   = React.useState(false);
 
   const sg = v => { setGoals(v); save("garry_goals_v3", v); };
@@ -243,12 +244,20 @@ function App() {
                   style={{ background: "none", border: "none", color: "#475569", fontSize: 16, cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0 }}>✕</button>
               </div>
             ))}
-            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-              <input value={newTask} onChange={e => setNewTask(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter" && newTask.trim()) { st([...tasks, { id: Date.now(), text: newTask.trim(), done: false }]); setNewTask(""); } }}
-                placeholder="Добавить задачу..." style={{ ...inp, flex: 1 }} />
-              <button onClick={() => { if (newTask.trim()) { st([...tasks, { id: Date.now(), text: newTask.trim(), done: false }]); setNewTask(""); } }}
-                style={{ background: "#f97316", color: "#fff", border: "none", padding: "9px 16px", borderRadius: 8, fontSize: 16, cursor: "pointer", fontWeight: 700 }}>+</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
+              <select value={newTaskGoalId} onChange={e => setNewTaskGoalId(+e.target.value)}
+                style={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", padding: "9px 12px", borderRadius: 8, fontSize: 13, outline: "none", width: "100%" }}>
+                {goals.map(g => (
+                  <option key={g.id} value={g.id}>{g.title}</option>
+                ))}
+              </select>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input value={newTask} onChange={e => setNewTask(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter" && newTask.trim()) { st([...tasks, { id: Date.now(), text: newTask.trim(), done: false, goalId: newTaskGoalId }]); setNewTask(""); } }}
+                  placeholder="Добавить задачу..." style={{ ...inp, flex: 1 }} />
+                <button onClick={() => { if (newTask.trim()) { st([...tasks, { id: Date.now(), text: newTask.trim(), done: false, goalId: newTaskGoalId }]); setNewTask(""); } }}
+                  style={{ background: "#f97316", color: "#fff", border: "none", padding: "9px 16px", borderRadius: 8, fontSize: 16, cursor: "pointer", fontWeight: 700 }}>+</button>
+              </div>
             </div>
           </div>
         )}
