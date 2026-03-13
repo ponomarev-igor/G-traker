@@ -14,19 +14,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Restore Garmin session cache
+        id: garmin-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .garth
+          key: garmin-session-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            garmin-session-${{ runner.os }}-
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install garminconnect garth
+        run: pip install garth
 
       - name: Fetch Garmin data
         env:
-          GARMIN_OAUTH1: ${{ secrets.GARMIN_OAUTH1 }}
-          GARMIN_OAUTH2: ${{ secrets.GARMIN_OAUTH2 }}
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+          GARMIN_MFA_CODE: ${{ secrets.GARMIN_MFA_CODE }}
+          GARMIN_TOKEN_DIR: .garth
         run: python fetch_garmin.py
+
+      - name: Save Garmin session cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .garth
+          key: ${{ steps.garmin-cache.outputs.cache-primary-key }}
 
       - name: Commit and push
         run: |
