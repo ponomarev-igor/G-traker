@@ -13,51 +13,49 @@ try:
 
     headers = {
         "Authorization": f"Bearer {access_token}",
-        "User-Agent": "Mozilla/5.0",
-        "nk": "NT"
+        "User-Agent": "GCM-iOS-5.7.2.1 (com.garmin.connect.mobile; build:5.7.2.1; iOS 16.4.0) Alamofire/5.6.4",
+        "nk": "NT",
+        "accept": "application/json, text/plain, */*",
+        "accept-language": "en-US,en;q=0.9",
+        "di-backend": "connectapi.garmin.com",
+        "x-app-ver": "5.7.2.1",
+        "x-lang": "en-US",
     }
 
     base = "https://connectapi.garmin.com"
 
     # Профиль
-    profile = requests.get(f"{base}/userprofile-service/userprofile/personal-information", headers=headers).json()
-    print(f"Profile response: {list(profile.keys()) if isinstance(profile, dict) else profile}")
+    r = requests.get(f"{base}/userprofile-service/userprofile/personal-information", headers=headers)
+    print(f"Profile status: {r.status_code}, body: {r.text[:300]}")
+    profile = r.json()
     display_name = profile.get("displayName") or profile.get("userName", "")
     print(f"✅ display_name: {display_name}")
 
-    # Шаги
-    steps = 0
-    try:
-        steps_data = requests.get(f"{base}/wellness-service/wellness/dailySummaryChart/{display_name}?date={today_str}", headers=headers).json()
-        if isinstance(steps_data, list):
-            steps = sum(e.get("steps", 0) for e in steps_data)
-    except: pass
+    steps, calories, resting_hr, stress, sleep_hours, battery = 0, 0, 0, 0, 0, 0
 
-    # Статистика
-    calories, resting_hr, stress = 0, 0, 0
-    try:
-        stats = requests.get(f"{base}/usersummary-service/usersummary/daily/{display_name}?calendarDate={today_str}", headers=headers).json()
+    r2 = requests.get(f"{base}/usersummary-service/usersummary/daily/{display_name}?calendarDate={today_str}", headers=headers)
+    print(f"Stats status: {r2.status_code}, body: {r2.text[:200]}")
+    if r2.ok and r2.text:
+        stats = r2.json()
         calories   = int(stats.get("totalKilocalories", 0))
         resting_hr = stats.get("restingHeartRate", 0)
         stress     = stats.get("averageStressLevel", 0)
-    except: pass
+        steps      = stats.get("totalSteps", 0)
 
-    # Сон
-    sleep_hours = 0
-    try:
-        sleep_data = requests.get(f"{base}/wellness-service/wellness/dailySleepData/{display_name}?date={today_str}&nonSleepBufferMinutes=60", headers=headers).json()
-        if sleep_data and "dailySleepDTO" in sleep_data:
-            sleep_hours = round(sleep_data["dailySleepDTO"].get("sleepTimeSeconds", 0) / 3600, 1)
-    except: pass
+    r3 = requests.get(f"{base}/wellness-service/wellness/dailySleepData/{display_name}?date={today_str}&nonSleepBufferMinutes=60", headers=headers)
+    print(f"Sleep status: {r3.status_code}")
+    if r3.ok and r3.text:
+        sd = r3.json()
+        if sd and "dailySleepDTO" in sd:
+            sleep_hours = round(sd["dailySleepDTO"].get("sleepTimeSeconds", 0) / 3600, 1)
 
-    # Body Battery
-    battery = 0
-    try:
-        bb = requests.get(f"{base}/wellness-service/wellness/bodyBattery/reading/day/{today_str}", headers=headers).json()
+    r4 = requests.get(f"{base}/wellness-service/wellness/bodyBattery/reading/day/{today_str}", headers=headers)
+    print(f"Battery status: {r4.status_code}")
+    if r4.ok and r4.text:
+        bb = r4.json()
         if isinstance(bb, list) and bb:
             last = bb[-1]
             battery = last[1] if isinstance(last, list) else last.get("bodyBatteryLevel", 0)
-    except: pass
 
     result = {
         "date": today_str,
