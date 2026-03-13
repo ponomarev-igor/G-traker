@@ -1,48 +1,63 @@
 import json
 import os
 import base64
-import tempfile
 from datetime import date
-import garth
+import requests
 
 today = date.today()
 today_str = today.isoformat()
 
 try:
-    oauth1_data = base64.b64decode(os.environ["GARMIN_OAUTH1"]).decode("utf-8")
-    oauth2_data = base64.b64decode(os.environ["GARMIN_OAUTH2"]).decode("utf-8")
+    oauth2 = json.loads(base64.b64decode(os.environ["GARMIN_OAUTH2"]).decode("utf-8"))
+    access_token = oauth2["access_token"]
 
-    # Сохраняем токены во временную папку и грузим через garth.resume
-    tmpdir = tempfile.mkdtemp()
-    with open(f"{tmpdir}/oauth1_token.json", "w") as f:
-        f.write(oauth1_data)
-    with open(f"{tmpdir}/oauth2_token.json", "w") as f:
-        f.write(oauth2_data)
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "User-Agent": "Mozilla/5.0",
+        "nk": "NT"
+    }
 
-    garth.resume(tmpdir)
-    garth.client.username  # проверяем что авторизован
+    base = "https://connectapi.garmin.com"
 
-    display_name = garth.client.profile["displayName"]
-    print(f"✅ Профиль: {display_name}")
+    # Профиль
+    profile = requests.get(f"{base}/userprofile-service/userprofile/personal-information", headers=headers).json()
+    print(f"Profile response: {list(profile.keys()) if isinstance(profile, dict) else profile}")
+    display_name = profile.get("displayName") or profile.get("userName", "")
+    print(f"✅ display_name: {display_name}")
 
-    steps_data = garth.client.connectapi(f"/wellness-service/wellness/dailySummaryChart/{display_name}?date={today_str}")
-    steps = sum(e.get("steps", 0) for e in steps_data) if isinstance(steps_data, list) else 0
+    # Шаги
+    steps = 0
+    try:
+        steps_data = requests.get(f"{base}/wellness-service/wellness/dailySummaryChart/{display_name}?date={today_str}", headers=headers).json()
+        if isinstance(steps_data, list):
+            steps = sum(e.get("steps", 0) for e in steps_data)
+    except: pass
 
-    stats = garth.client.connectapi(f"/usersummary-service/usersummary/daily/{display_name}?calendarDate={today_str}")
-    calories   = int(stats.get("totalKilocalories", 0))
-    resting_hr = stats.get("restingHeartRate", 0)
-    stress     = stats.get("averageStressLevel", 0)
+    # Статистика
+    calories, resting_hr, stress = 0, 0, 0
+    try:
+        stats = requests.get(f"{base}/usersummary-service/usersummary/daily/{display_name}?calendarDate={today_str}", headers=headers).json()
+        calories   = int(stats.get("totalKilocalories", 0))
+        resting_hr = stats.get("restingHeartRate", 0)
+        stress     = stats.get("averageStressLevel", 0)
+    except: pass
 
-    sleep_data = garth.client.connectapi(f"/wellness-service/wellness/dailySleepData/{display_name}?date={today_str}&nonSleepBufferMinutes=60")
+    # Сон
     sleep_hours = 0
-    if sleep_data and "dailySleepDTO" in sleep_data:
-        sleep_hours = round(sleep_data["dailySleepDTO"].get("sleepTimeSeconds", 0) / 3600, 1)
+    try:
+        sleep_data = requests.get(f"{base}/wellness-service/wellness/dailySleepData/{display_name}?date={today_str}&nonSleepBufferMinutes=60", headers=headers).json()
+        if sleep_data and "dailySleepDTO" in sleep_data:
+            sleep_hours = round(sleep_data["dailySleepDTO"].get("sleepTimeSeconds", 0) / 3600, 1)
+    except: pass
 
-    bb_data = garth.client.connectapi(f"/wellness-service/wellness/bodyBattery/reading/day/{today_str}")
+    # Body Battery
     battery = 0
-    if isinstance(bb_data, list) and bb_data:
-        last = bb_data[-1]
-        battery = last[1] if isinstance(last, list) else last.get("bodyBatteryLevel", 0)
+    try:
+        bb = requests.get(f"{base}/wellness-service/wellness/bodyBattery/reading/day/{today_str}", headers=headers).json()
+        if isinstance(bb, list) and bb:
+            last = bb[-1]
+            battery = last[1] if isinstance(last, list) else last.get("bodyBatteryLevel", 0)
+    except: pass
 
     result = {
         "date": today_str,
