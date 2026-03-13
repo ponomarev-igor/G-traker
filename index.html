@@ -71,6 +71,7 @@ function App() {
   const [logDate, setLogDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [newTask, setNewTask] = React.useState("");
   const [newTaskGoalId, setNewTaskGoalId] = React.useState(1);
+  const [filterGoalId, setFilterGoalId] = React.useState(0);
   const [saved, setSaved]   = React.useState(false);
 
   const sg = v => { setGoals(v); save("garry_goals_v3", v); };
@@ -225,14 +226,24 @@ function App() {
         {/* TASKS */}
         {tab === "tasks" && (
           <div style={card}>
-            <div style={hdg}>Задачи до 1 апреля · {done}/{tasks.length}</div>
+            <div style={hdg}>Задачи · {done}/{tasks.length}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
               <div style={{ flex: 1, height: 8, background: "#334155", borderRadius: 999, overflow: "hidden" }}>
                 <div style={{ width: pct + "%", height: "100%", background: "#f97316", borderRadius: 999, transition: "width 0.4s" }} />
               </div>
               <span style={{ fontSize: 14, fontWeight: 800, color: "#f97316" }}>{pct}%</span>
             </div>
-            {tasks.map(task => (
+
+            {/* Filter by goal */}
+            <select value={filterGoalId} onChange={e => setFilterGoalId(+e.target.value)}
+              style={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", padding: "9px 12px", borderRadius: 8, fontSize: 13, outline: "none", width: "100%", marginBottom: 12 }}>
+              <option value={0}>Все цели</option>
+              {goals.map(g => (
+                <option key={g.id} value={g.id}>{g.title}</option>
+              ))}
+            </select>
+
+            {tasks.filter(t => filterGoalId === 0 || t.goalId === filterGoalId).map(task => (
               <div key={task.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0", borderBottom: "1px solid #334155" }}>
                 <div onClick={() => st(tasks.map(t => t.id === task.id ? { ...t, done: !t.done } : t))}
                   style={{ width: 20, height: 20, borderRadius: 5, flexShrink: 0, border: task.done ? "none" : "2px solid #475569", background: task.done ? "#f97316" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -244,6 +255,7 @@ function App() {
                   style={{ background: "none", border: "none", color: "#475569", fontSize: 16, cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0 }}>✕</button>
               </div>
             ))}
+
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 14 }}>
               <select value={newTaskGoalId} onChange={e => setNewTaskGoalId(+e.target.value)}
                 style={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", padding: "9px 12px", borderRadius: 8, fontSize: 13, outline: "none", width: "100%" }}>
