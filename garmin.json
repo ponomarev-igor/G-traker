@@ -6,5 +6,5 @@
   "resting_hr": 0,
   "stress": 0,
   "body_battery": 0,
-  "error": "Unterminated string starting at: line 1 column 715 (char 714)"
+  "error": "Authentication failed: Error in request: 401 Client Error: Unauthorized for url: https://connectapi.garmin.com/wellness-service/wellness/dailySummaryChart/None?date=2026-03-13"
 }
