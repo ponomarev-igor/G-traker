@@ -223,12 +223,6 @@ function App() {
         {tab === "tasks" && (
           <div style={card}>
             <div style={hdg}>Задачи · {done}/{tasks.length}</div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-              <div style={{ flex: 1, height: 8, background: "#334155", borderRadius: 999, overflow: "hidden" }}>
-                <div style={{ width: pct + "%", height: "100%", background: "#f97316", borderRadius: 999, transition: "width 0.4s" }} />
-              </div>
-              <span style={{ fontSize: 14, fontWeight: 800, color: "#f97316" }}>{pct}%</span>
-            </div>
 
             <select value={activeGoalId} onChange={e => setActiveGoalId(+e.target.value)}
               style={{ background: "#0f172a", border: "1px solid #3b82f6", color: "#e2e8f0", padding: "9px 12px", borderRadius: 8, fontSize: 13, outline: "none", width: "100%", marginBottom: 14, fontWeight: 600 }}>
