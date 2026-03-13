@@ -6,5 +6,5 @@
   "resting_hr": 0,
   "stress": 0,
   "body_battery": 0,
-  "error": "Login failed: OAuth1 token is required for OAuth2 refresh"
+  "error": "module 'garth' has no attribute 'auth'"
 }
