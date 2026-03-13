@@ -29,13 +29,13 @@ const INITIAL_GOALS = [
 ];
 
 const INITIAL_TASKS = [
-  { id: 1, text: "Поговорить со знакомым про ворота — предложить ведение", done: false },
-  { id: 2, text: "Создать новый Instagram аккаунт (маркетинг + vibe)", done: false },
-  { id: 3, text: "Написать шапку профиля и упаковать аккаунт", done: false },
-  { id: 4, text: "Написать сценарий первого Reels", done: false },
-  { id: 5, text: "Снять и опубликовать первый Reels", done: false },
-  { id: 6, text: "Найти ещё 2-3 потенциальных клиентов в окружении", done: false },
-  { id: 7, text: "Определить тему первого продукта на vibe-кодинге", done: false },
+  { id: 1, text: "Поговорить со знакомым про ворота — предложить ведение", done: false, goalId: 1 },
+  { id: 2, text: "Создать новый Instagram аккаунт (маркетинг + vibe)", done: false, goalId: 2 },
+  { id: 3, text: "Написать шапку профиля и упаковать аккаунт", done: false, goalId: 2 },
+  { id: 4, text: "Написать сценарий первого Reels", done: false, goalId: 3 },
+  { id: 5, text: "Снять и опубликовать первый Reels", done: false, goalId: 3 },
+  { id: 6, text: "Найти ещё 2-3 потенциальных клиентов в окружении", done: false, goalId: 4 },
+  { id: 7, text: "Определить тему первого продукта на vibe-кодинге", done: false, goalId: 5 },
 ];
 
 const TRACKS = {
@@ -73,7 +73,22 @@ function App() {
   const [saved, setSaved]   = React.useState(false);
 
   const sg = v => { setGoals(v); save("garry_goals_v3", v); };
-  const st = v => { setTasks(v); save("garry_tasks_v3", v); };
+  const st = v => {
+    setTasks(v);
+    save("garry_tasks_v3", v);
+    // Auto-update goal progress based on linked tasks
+    setGoals(prev => {
+      const updated = prev.map(goal => {
+        const linked = v.filter(t => t.goalId === goal.id);
+        if (linked.length === 0) return goal;
+        const donePct = Math.round(linked.filter(t => t.done).length / linked.length * 100);
+        const newStatus = donePct === 100 ? "done" : donePct > 0 ? "active" : goal.status === "done" ? "planned" : goal.status;
+        return { ...goal, progress: donePct, status: newStatus };
+      });
+      save("garry_goals_v3", updated);
+      return updated;
+    });
+  };
   const sl = v => { setLogs(v);  save("garry_logs_v3",  v); };
 
   const done = tasks.filter(t => t.done).length;
