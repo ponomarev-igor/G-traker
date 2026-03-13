@@ -28,28 +28,29 @@
 <script type="text/babel">
 
 const INITIAL_GOALS = [
-  { id: 1, title: "Закрыть первого SMM-клиента (ворота)", deadline: "Март 2026", status: "active", track: "smm", progress: 10 },
-  { id: 2, title: "Создать и упаковать новый Instagram аккаунт", deadline: "Март 2026", status: "active", track: "brand", progress: 0 },
-  { id: 3, title: "Снять первые 4 Reels (маркетинг + vibe-кодинг)", deadline: "Апрель 2026", status: "planned", track: "brand", progress: 0 },
-  { id: 4, title: "Найти ещё 1-2 SMM-клиентов", deadline: "Апрель 2026", status: "planned", track: "smm", progress: 0 },
-  { id: 5, title: "Создать первый продукт на vibe-кодинге", deadline: "Май 2026", status: "planned", track: "vibe", progress: 0 },
-  { id: 6, title: "Выйти на стабильный доход от SMM-услуг", deadline: "Июль 2026", status: "planned", track: "smm", progress: 0 },
+  { id: 1, title: "Создать контент-план и начать снимать Reels по ИИ", deadline: "Март 2026", status: "active", track: "ai", progress: 0 },
+  { id: 2, title: "Набрать первую аудиторию и прогреть к курсу", deadline: "Апрель 2026", status: "planned", track: "ai", progress: 0 },
+  { id: 3, title: "Запустить первый курс по нейросетям", deadline: "Май 2026", status: "planned", track: "ai", progress: 0 },
+  { id: 4, title: "Создать и упаковать новый Instagram аккаунт", deadline: "Март 2026", status: "active", track: "brand", progress: 0 },
+  { id: 5, title: "Встретиться со знакомым по воротам (запасной план)", deadline: "Апрель 2026", status: "planned", track: "smm", progress: 0 },
+  { id: 6, title: "Взять 1-2 SMM-клиентов (если курс не пойдёт)", deadline: "Май 2026", status: "planned", track: "smm", progress: 0 },
 ];
 
 const INITIAL_TASKS = [
-  { id: 1, text: "Поговорить со знакомым про ворота — предложить ведение", done: false, goalId: 1 },
-  { id: 2, text: "Создать новый Instagram аккаунт (маркетинг + vibe)", done: false, goalId: 2 },
-  { id: 3, text: "Написать шапку профиля и упаковать аккаунт", done: false, goalId: 2 },
-  { id: 4, text: "Написать сценарий первого Reels", done: false, goalId: 3 },
-  { id: 5, text: "Снять и опубликовать первый Reels", done: false, goalId: 3 },
-  { id: 6, text: "Найти ещё 2-3 потенциальных клиентов в окружении", done: false, goalId: 4 },
-  { id: 7, text: "Определить тему первого продукта на vibe-кодинге", done: false, goalId: 5 },
+  { id: 1, text: "Определить узкую тему курса по ИИ", done: false, goalId: 1 },
+  { id: 2, text: "Составить контент-план на первый месяц", done: false, goalId: 1 },
+  { id: 3, text: "Снять и опубликовать первый Reels по ИИ", done: false, goalId: 1 },
+  { id: 4, text: "Создать новый Instagram аккаунт", done: false, goalId: 4 },
+  { id: 5, text: "Упаковать шапку профиля", done: false, goalId: 4 },
+  { id: 6, text: "Написать структуру курса", done: false, goalId: 3 },
+  { id: 7, text: "Связаться со знакомым по воротам", done: false, goalId: 5 },
 ];
 
 const TRACKS = {
-  smm:   { label: "SMM-услуги",   color: "#3b82f6" },
-  vibe:  { label: "Vibe-кодинг",  color: "#8b5cf6" },
-  brand: { label: "Личный бренд", color: "#ec4899" },
+  ai:    { label: "ИИ / Нейросети", color: "#f97316" },
+  brand: { label: "Личный бренд",   color: "#ec4899" },
+  smm:   { label: "SMM (запасной)", color: "#64748b" },
+  vibe:  { label: "Vibe-кодинг",    color: "#8b5cf6" },
 };
 
 const STATUS_MAP = {
@@ -72,19 +73,19 @@ function save(key, val) {
 
 function App() {
   const [tab, setTab]       = React.useState("dashboard");
-  const [goals, setGoals]   = React.useState(() => load("garry_goals_v4", INITIAL_GOALS));
-  const [tasks, setTasks]   = React.useState(() => load("garry_tasks_v4", INITIAL_TASKS));
-  const [logs, setLogs]     = React.useState(() => load("garry_logs_v4", []));
+  const [goals, setGoals]   = React.useState(() => load("garry_goals_v5", INITIAL_GOALS));
+  const [tasks, setTasks]   = React.useState(() => load("garry_tasks_v5", INITIAL_TASKS));
+  const [logs, setLogs]     = React.useState(() => load("garry_logs_v5", []));
   const [logText, setLogText] = React.useState("");
   const [logDate, setLogDate] = React.useState(new Date().toISOString().slice(0, 10));
   const [newTask, setNewTask] = React.useState("");
   const [activeGoalId, setActiveGoalId] = React.useState(1);
   const [saved, setSaved]   = React.useState(false);
 
-  const sg = v => { setGoals(v); save("garry_goals_v4", v); };
+  const sg = v => { setGoals(v); save("garry_goals_v5", v); };
   const st = v => {
     setTasks(v);
-    save("garry_tasks_v4", v);
+    save("garry_tasks_v5", v);
     // Auto-update goal progress based on linked tasks
     setGoals(prev => {
       const updated = prev.map(goal => {
@@ -94,11 +95,11 @@ function App() {
         const newStatus = donePct === 100 ? "done" : donePct > 0 ? "active" : goal.status === "done" ? "planned" : goal.status;
         return { ...goal, progress: donePct, status: newStatus };
       });
-      save("garry_goals_v4", updated);
+      save("garry_goals_v5", updated);
       return updated;
     });
   };
-  const sl = v => { setLogs(v);  save("garry_logs_v4",  v); };
+  const sl = v => { setLogs(v);  save("garry_logs_v5",  v); };
 
   const done = tasks.filter(t => t.done).length;
   const pct  = tasks.length ? Math.round(done / tasks.length * 100) : 0;
@@ -134,8 +135,8 @@ function App() {
         {tab === "dashboard" && <>
           <div style={{ background: "linear-gradient(135deg,#1c1917,#1e293b)", border: "1px solid #f97316", borderRadius: 12, padding: 16, marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: "#f97316", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>🔥 Главный фокус</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#fef3c7" }}>Закрыть первого клиента + запустить аккаунт</div>
-            <div style={{ fontSize: 13, color: "#a8a29e", marginTop: 4 }}>4 месяца в запасе · Март — Июль 2026</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#fef3c7" }}>Курс по нейросетям — запуск за 2 месяца</div>
+            <div style={{ fontSize: 13, color: "#a8a29e", marginTop: 4 }}>SMM и ворота — запасной план · Март — Июль 2026</div>
           </div>
 
           <div className="stat-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
@@ -181,7 +182,7 @@ function App() {
               ["Бэкграунд", "15 лет на заводах → онлайн с ноября 2025"],
               ["Обучение", "Курс Элеоноры Тюриной (маркетинговые стратегии, 8 нед.)"],
               ["Тех. база", "HTML, CSS, JS (базово) + vibe-кодинг (в изучении)"],
-              ["Направление", "SMM-услуги + vibe-кодинг + личный бренд"],
+              ["Направление", "ИИ / Нейросети — курс + личный бренд · SMM запасной план"],
               ["Первый клиент", "Знакомый — продажа автоматических ворот, 11,7к подписчиков"],
               ["Менторство", "Клуб Миши Тимочка — запуски и воронки"],
               ["Горизонт", "4 месяца (март — июль 2026)"],
