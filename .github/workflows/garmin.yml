@@ -1,0 +1,34 @@
+name: Fetch Garmin Data
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Каждый день в 6:00 UTC (9:00 Астана)
+  workflow_dispatch:       # Можно запустить вручную
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install garminconnect
+
+      - name: Fetch Garmin data
+        env:
+          GARMIN_EMAIL: ${{ secrets.GARMIN_EMAIL }}
+          GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+        run: python fetch_garmin.py
+
+      - name: Commit and push
+        run: |
+          git config user.email "garry@navigator.com"
+          git config user.name "Garry Navigator Bot"
+          git add garmin.json
+          git diff --staged --quiet || git commit -m "Update Garmin data $(date +'%Y-%m-%d')"
+          git push
