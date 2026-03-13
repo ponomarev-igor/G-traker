@@ -1,5 +1,6 @@
 import json
 import os
+import base64
 from datetime import date
 import garth
 from garth.http import OAuth1Token, OAuth2Token
@@ -9,8 +10,8 @@ today = date.today()
 today_str = today.isoformat()
 
 try:
-    oauth1 = json.loads(os.environ["GARMIN_OAUTH1"])
-    oauth2 = json.loads(os.environ["GARMIN_OAUTH2"])
+    oauth1 = json.loads(base64.b64decode(os.environ["GARMIN_OAUTH1"]).decode("utf-8"))
+    oauth2 = json.loads(base64.b64decode(os.environ["GARMIN_OAUTH2"]).decode("utf-8"))
 
     garth.configure(domain="garmin.com")
     garth.client.oauth1_token = OAuth1Token(**oauth1)
