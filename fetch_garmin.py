@@ -1,61 +1,57 @@
 import json
 import os
 import base64
+import tempfile
 from datetime import date
-import requests
+import garth
 
 today = date.today()
 today_str = today.isoformat()
 
 try:
-    oauth2 = json.loads(base64.b64decode(os.environ["GARMIN_OAUTH2"]).decode("utf-8"))
-    access_token = oauth2["access_token"]
+    oauth1_data = base64.b64decode(os.environ["GARMIN_OAUTH1"]).decode("utf-8")
+    oauth2_data = base64.b64decode(os.environ["GARMIN_OAUTH2"]).decode("utf-8")
 
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-        "User-Agent": "GCM-iOS-5.7.2.1 (com.garmin.connect.mobile; build:5.7.2.1; iOS 16.4.0) Alamofire/5.6.4",
-        "nk": "NT",
-        "accept": "application/json, text/plain, */*",
-        "accept-language": "en-US,en;q=0.9",
-        "di-backend": "connectapi.garmin.com",
-        "x-app-ver": "5.7.2.1",
-        "x-lang": "en-US",
-    }
+    tmpdir = tempfile.mkdtemp()
+    with open(f"{tmpdir}/oauth1_token.json", "w") as f:
+        f.write(oauth1_data)
+    with open(f"{tmpdir}/oauth2_token.json", "w") as f:
+        f.write(oauth2_data)
 
-    base = "https://connectapi.garmin.com"
+    garth.resume(tmpdir)
 
-    # Профиль
-    r = requests.get(f"{base}/userprofile-service/userprofile/personal-information", headers=headers)
-    print(f"Profile status: {r.status_code}, body: {r.text[:300]}")
-    profile = r.json()
-    display_name = profile.get("displayName") or profile.get("userName", "")
+    # Получаем профиль через garth
+    profile = garth.connectapi("/userprofile-service/socialProfile")
+    print(f"Profile: {profile}")
+    display_name = profile.get("displayName", "")
     print(f"✅ display_name: {display_name}")
 
     steps, calories, resting_hr, stress, sleep_hours, battery = 0, 0, 0, 0, 0, 0
 
-    r2 = requests.get(f"{base}/usersummary-service/usersummary/daily/{display_name}?calendarDate={today_str}", headers=headers)
-    print(f"Stats status: {r2.status_code}, body: {r2.text[:200]}")
-    if r2.ok and r2.text:
-        stats = r2.json()
+    try:
+        stats = garth.connectapi(f"/usersummary-service/usersummary/daily/{display_name}?calendarDate={today_str}")
+        print(f"Stats: {stats}")
         calories   = int(stats.get("totalKilocalories", 0))
         resting_hr = stats.get("restingHeartRate", 0)
         stress     = stats.get("averageStressLevel", 0)
         steps      = stats.get("totalSteps", 0)
+    except Exception as e:
+        print(f"Stats error: {e}")
 
-    r3 = requests.get(f"{base}/wellness-service/wellness/dailySleepData/{display_name}?date={today_str}&nonSleepBufferMinutes=60", headers=headers)
-    print(f"Sleep status: {r3.status_code}")
-    if r3.ok and r3.text:
-        sd = r3.json()
+    try:
+        sd = garth.connectapi(f"/wellness-service/wellness/dailySleepData/{display_name}?date={today_str}&nonSleepBufferMinutes=60")
         if sd and "dailySleepDTO" in sd:
             sleep_hours = round(sd["dailySleepDTO"].get("sleepTimeSeconds", 0) / 3600, 1)
+    except Exception as e:
+        print(f"Sleep error: {e}")
 
-    r4 = requests.get(f"{base}/wellness-service/wellness/bodyBattery/reading/day/{today_str}", headers=headers)
-    print(f"Battery status: {r4.status_code}")
-    if r4.ok and r4.text:
-        bb = r4.json()
+    try:
+        bb = garth.connectapi(f"/wellness-service/wellness/bodyBattery/reading/day/{today_str}")
         if isinstance(bb, list) and bb:
             last = bb[-1]
             battery = last[1] if isinstance(last, list) else last.get("bodyBatteryLevel", 0)
+    except Exception as e:
+        print(f"Battery error: {e}")
 
     result = {
         "date": today_str,
