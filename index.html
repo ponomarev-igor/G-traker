@@ -205,9 +205,6 @@ function App() {
                     <span style={{ fontSize: 12, color: "#64748b", minWidth: 32 }}>{goal.progress}%</span>
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-                    <input type="range" min="0" max="100" value={goal.progress}
-                      onChange={e => sg(goals.map(g => g.id === goal.id ? { ...g, progress: +e.target.value } : g))}
-                      style={{ width: 100, accentColor: track.color, cursor: "pointer" }} />
                     <select value={goal.status}
                       onChange={e => sg(goals.map(g => g.id === goal.id ? { ...g, status: e.target.value } : g))}
                       style={{ background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", padding: "4px 8px", borderRadius: 6, fontSize: 12, cursor: "pointer" }}>
